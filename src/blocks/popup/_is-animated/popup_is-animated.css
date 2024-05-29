@@ -1,0 +1,8 @@
+.popup_is-animated {
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: none;
+    user-select: none;
+    transition-delay: 0s;
+}
