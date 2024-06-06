@@ -8,6 +8,13 @@ export function closeModal(popupElement) {
   document.removeEventListener('keydown', handleEscClose);
 }
 
+const avatarPopup = document.querySelector('.popup_type_avatar');
+const closeAvatarPopupButton = avatarPopup.querySelector('.popup__close');
+
+closeAvatarPopupButton.addEventListener('click', () => {
+  closeModal(avatarPopup);
+});
+
 function handleEscClose(event) {
   if (event.key === 'Escape') {
       const openedPopup = document.querySelector('.popup_is-opened');

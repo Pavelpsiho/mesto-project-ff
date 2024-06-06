@@ -8,10 +8,22 @@
   box-sizing: border-box;
   padding: 10px 0 0;
   margin-bottom: 10px;
+  position: relative;
 }
 
 .popup__input:last-of-type {
   margin-bottom: 0;
+}
+
+.error {
+  color: #FF0000;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 14.52px;
+}
+
+.popup__input:invalid {
+  border-bottom: 1px solid #FF0000; /* Устанавливаем красную рамку под полем ввода при наличии ошибки */
 }
 
 @media screen and (max-width: 568px) {
