@@ -1,12 +1,18 @@
-import { likeCardOnServer, unlikeCardOnServer } from './api.js';
+import { openModal } from './modal.js';
+import { openPopupWithImage } from '../index.js';
+import { deleteCardFromServer, likeCardOnServer, unlikeCardOnServer } from './api.js';
+
+export function unlikeCard(cardId) {
+  return unlikeCardOnServer(cardId);
+}
 
 export function createCard(cardData, userId, deleteCallback, openPopupCallback) {
   const cardTemplate = document.querySelector('#card-template').content.cloneNode(true);
   const cardElement = cardTemplate.querySelector('.places__item');
-  const cardImage = cardTemplate.querySelector('.card__image');
-  const cardTitle = cardTemplate.querySelector('.card__title');
-  const likeButton = cardTemplate.querySelector('.card__like-button');
-  const likeCounter = cardTemplate.querySelector('.card__like-counter');
+  const cardImage = cardElement.querySelector('.card__image');
+  const cardTitle = cardElement.querySelector('.card__title');
+  const likeButton = cardElement.querySelector('.card__like-button');
+  const likeCounter = cardElement.querySelector('.card__like-counter');
 
   cardImage.src = cardData.link;
   cardImage.alt = cardData.name;
@@ -17,9 +23,22 @@ export function createCard(cardData, userId, deleteCallback, openPopupCallback) 
     likeButton.classList.add('card__like-button_liked');
   }
 
-  const deleteButton = cardTemplate.querySelector('.card__delete-button');
+  const deleteButton = cardElement.querySelector('.card__delete-button');
+
+  if (cardData.owner._id === userId) {
+    deleteButton.style.display = 'block';
+  } else {
+    deleteButton.style.display = 'none';
+  }
+
   deleteButton.addEventListener('click', () => {
-    deleteCallback(cardElement);
+    deleteCardFromServer(cardData._id)
+      .then(() => {
+        deleteCallback(cardElement);
+      })
+      .catch(error => {
+        console.error('Ошибка удаления карточки:', error);
+      });
   });
 
   cardImage.addEventListener('click', () => {
@@ -27,25 +46,24 @@ export function createCard(cardData, userId, deleteCallback, openPopupCallback) 
   });
 
   likeButton.addEventListener('click', () => {
-    if (!cardData._id) {
-      console.error('Card ID is undefined');
-      return;
-    }
-
-    if (likeButton.classList.contains('card__like-button_liked')) {
-      unlikeCardOnServer(cardData._id)
-        .then(updatedCard => {
-          likeCounter.textContent = updatedCard.likes.length;
-          likeButton.classList.remove('card__like-button_liked');
-        })
-        .catch(err => console.log(err));
-    } else {
+    if (!likeButton.classList.contains('card__like-button_is-active')) {
       likeCardOnServer(cardData._id)
-        .then(updatedCard => {
-          likeCounter.textContent = updatedCard.likes.length;
-          likeButton.classList.add('card__like-button_liked');
+        .then(() => {
+          likeButton.classList.add('card__like-button_is-active');
+          likeCounter.textContent = parseInt(likeCounter.textContent) + 1;
         })
-        .catch(err => console.log(err));
+        .catch(error => {
+          console.error('Ошибка лайка карточки:', error);
+        });
+    } else {
+      unlikeCardOnServer(cardData._id)
+        .then(() => {
+          likeButton.classList.remove('card__like-button_is-active');
+          likeCounter.textContent = parseInt(likeCounter.textContent) - 1;
+        })
+        .catch(error => {
+          console.error('Ошибка снятия лайка с карточки:', error);
+        });
     }
   });
 

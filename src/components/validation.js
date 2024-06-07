@@ -6,7 +6,7 @@ function showInputError(formElement, inputElement, settings) {
         errorElement.classList.add(settings.errorClass);
     }
 }
-
+ 
 function hideInputError(formElement, inputElement, settings) {
     const errorElement = formElement.querySelector(`#${inputElement.id}-error`);
     if (errorElement) {
@@ -15,11 +15,10 @@ function hideInputError(formElement, inputElement, settings) {
         errorElement.classList.remove(settings.errorClass);
     }
 }
-
+ 
 function checkInputValidity(formElement, inputElement, settings) {
     const nameRegex = /^[a-zA-Zа-яА-ЯёЁ\s-]{2,30}$/;
     const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
-
     if (!inputElement.validity.valid) {
         showInputError(formElement, inputElement, settings);
     } else if (inputElement.name === 'name' || inputElement.name === 'title') {
@@ -38,12 +37,12 @@ function checkInputValidity(formElement, inputElement, settings) {
             inputElement.setCustomValidity('');
             hideInputError(formElement, inputElement, settings);
         }
-    } else {
+    } else { 
         hideInputError(formElement, inputElement, settings);
     }
 }
-
-function toggleButtonState(inputList, buttonElement, settings) {
+ 
+function toggleButtonState(inputList, buttonElement, settings) { 
     const hasInvalidInput = inputList.some((inputElement) => !inputElement.validity.valid);
     if (buttonElement) {
         if (hasInvalidInput) {
@@ -51,7 +50,7 @@ function toggleButtonState(inputList, buttonElement, settings) {
             buttonElement.disabled = true;
         } else {
             buttonElement.classList.remove(settings.inactiveButtonClass);
-            buttonElement.disabled = false;
+            buttonElement.disabled = false; 
         }
     }
 }
@@ -59,7 +58,6 @@ function toggleButtonState(inputList, buttonElement, settings) {
 function setEventListeners(formElement, settings) {
     const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
     const buttonElement = formElement.querySelector(settings.submitButtonSelector);
-
     toggleButtonState(inputList, buttonElement, settings);
 
     inputList.forEach((inputElement) => {
@@ -69,28 +67,28 @@ function setEventListeners(formElement, settings) {
         });
     });
 }
-
+ 
 function enableValidation(settings) {
     const formList = Array.from(document.querySelectorAll(settings.formSelector));
-
     formList.forEach((formElement) => {
         formElement.addEventListener('submit', (evt) => {
             evt.preventDefault();
         });
-
         setEventListeners(formElement, settings);
     });
 }
-
+ 
 function clearValidation(formElement, settings) {
     const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
     const buttonElement = formElement.querySelector(settings.submitButtonSelector);
-
     inputList.forEach((inputElement) => {
         hideInputError(formElement, inputElement, settings);
     });
-
     toggleButtonState(inputList, buttonElement, settings);
 }
-
 export { enableValidation, clearValidation };
+
+export function isValidUrl(url) {
+    const urlPattern = /^(ftp|http|https):\/\/[^ "']+$/;
+    return urlPattern.test(url);
+  }

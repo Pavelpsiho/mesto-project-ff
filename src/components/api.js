@@ -119,3 +119,17 @@ export async function updateAvatar(avatar) {
     throw error;
   }
 }
+
+export async function editCard(cardId, newName, newLink) {
+  try {
+    const response = await fetch(`${config.baseUrl}/cards/${cardId}`, {
+      method: 'PATCH',
+      headers: config.headers,
+      body: JSON.stringify({ name: newName, link: newLink })
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Error editing card:', error);
+    throw error;
+  }
+}
