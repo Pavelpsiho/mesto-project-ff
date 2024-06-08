@@ -71,7 +71,11 @@ export function createCard(cardData, userId, deleteCallback, openPopupCallback) 
 }
 
 export function likeCard(likeButton) {
-  likeButton.classList.toggle('card__like-button_is-active');
+  if (likeButton) {
+    likeButton.classList.toggle('card__like-button_is-active');
+  } else {
+    console.error('likeButton is undefined');
+  }
 }
 
 export function deleteCard(cardElement) {

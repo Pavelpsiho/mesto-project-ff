@@ -1,20 +1,19 @@
 import './pages/index.css';
 import { openModal, closeModal, handleOverlayClose } from './components/modal.js';
-import { createCard, deleteCard, likeCard } from './components/card.js'; 
+import { createCard, deleteCard, likeCard } from './components/card.js';
 import { enableValidation, clearValidation, isValidUrl } from './components/validation.js';
-import { 
-  getUserInfo, 
-  getInitialCards, 
-  updateUserInfo, 
-  addNewCard, 
-  deleteCardFromServer, 
-  likeCardOnServer, 
-  unlikeCardOnServer, 
-  updateAvatar 
+import {
+  getUserInfo,
+  getInitialCards,
+  updateUserInfo,
+  addNewCard,
+  deleteCardFromServer,
+  likeCardOnServer,
+  unlikeCardOnServer,
+  updateAvatar
 } from './components/api.js';
 
 let userId;
-
 
 Promise.all([getUserInfo(), getInitialCards()])
   .then(([userData, cards]) => {
@@ -22,11 +21,11 @@ Promise.all([getUserInfo(), getInitialCards()])
     profileTitle.textContent = userData.name;
     profileDescription.textContent = userData.about;
     avatarElement.src = userData.avatar;
-
+    const storedAvatar = localStorage.getItem('userAvatar');
+    avatarElement.style.backgroundImage = storedAvatar ? `url(${storedAvatar})` : `url(${userData.avatar})`;
     cards.forEach(cardData => {
       const cardElement = createCard(cardData, userId, deleteCard, openPopupWithImage);
       addCardToPage(cardElement);
-      console.log(typeof deleteCard);
     });
   })
   .catch(err => console.log(err));
@@ -53,6 +52,22 @@ popupImage?.querySelector('.popup__close')?.addEventListener('click', () => clos
 function addCardToPage(cardElement) {
   const placesList = document.querySelector('.places__list');
   placesList?.appendChild(cardElement);
+}
+
+
+function bindCardEvents(cardElement) {
+  const deleteButton = cardElement.querySelector('.card__delete-button');
+  const cardImage = cardElement.querySelector('.card__image');
+
+  deleteButton.addEventListener('click', () => {
+    deleteCard(cardElement);
+  });
+
+  cardImage.addEventListener('click', () => {
+    const link = cardImage.src;
+    const name = cardElement.querySelector('.card__title').textContent;
+    openPopupWithImage(link, name);
+  });
 }
 
 const profileEditButton = document.querySelector('.profile__edit-button');
@@ -129,7 +144,7 @@ const handleFormSubmitNewCard = (evt) => {
 
   addNewCard(newCardTitle, newCardLink)
     .then((cardData) => {
-      const newCardElement = createCard(cardData, userId);
+      const newCardElement = createCard(cardData, userId, deleteCard, openPopupWithImage);
       const placesList = document.querySelector('.places__list');
       placesList.insertBefore(newCardElement, placesList.firstChild);
       closeModal(popupNewCard);
@@ -184,14 +199,14 @@ const handleAvatarSubmit = (evt) => {
 
   if (!isValidUrl(avatarUrl)) {
     console.error('Invalid URL:', avatarUrl);
-    saveButton.textContent = 'Сохранить'; 
+    saveButton.textContent = 'Сохранить';
     return;
   }
 
   updateAvatar(avatarUrl)
     .then((userData) => {
       if (avatarElement) {
-        avatarElement.style.backgroundImage = `url(${userData.avatar})`; 
+        avatarElement.style.backgroundImage = `url(${userData.avatar})`;
         closeModal(avatarPopup);
         avatarForm.reset();
       } else {
@@ -221,23 +236,14 @@ function closeConfirmPopup() {
 }
 
 
-deleteButton.addEventListener('click', () => {
-  openConfirmPopup();
-});
-
-const cancelButton = document.querySelector('.popup_type_confirm .popup__button_cancel');
-cancelButton.addEventListener('click', () => {
-  closeConfirmPopup();
-});
-
 function showInputError(editProfileForm, inputElement, settings) {
   const errorElement = editProfileForm.querySelector(`#${inputElement.id}-error`);
   const errorMessage = inputElement.dataset.errorMessage;
 
   if (errorElement) {
-      inputElement.classList.add(settings.inputErrorClass);
-      errorElement.textContent = errorMessage;
-      errorElement.classList.add(settings.errorClass);
+    inputElement.classList.add(settings.inputErrorClass);
+    errorElement.textContent = errorMessage;
+    errorElement.classList.add(settings.errorClass);
   }
 }
 
@@ -245,9 +251,9 @@ function hideInputError(editProfileForm, inputElement, settings) {
   const errorElement = editProfileForm.querySelector(`#${inputElement.id}-error`);
 
   if (errorElement) {
-      inputElement.classList.remove(settings.inputErrorClass);
-      errorElement.textContent = '';
-      errorElement.classList.remove(settings.errorClass);
+    inputElement.classList.remove(settings.inputErrorClass);
+    errorElement.textContent = '';
+    errorElement.classList.remove(settings.errorClass);
   }
 }
 
@@ -257,10 +263,11 @@ const descriptionInput = document.querySelector('.popup__input_type_description'
 const descriptionError = document.getElementById('description-error');
 
 
-nameInput.addEventListener('invalid', function() {
+nameInput.addEventListener('invalid', function () {
   nameError.textContent = nameInput.dataset.errorMessage;
 });
 
-descriptionInput.addEventListener('invalid', function() {
+descriptionInput.addEventListener('invalid', function () {
   descriptionError.textContent = descriptionInput.dataset.errorMessage;
 });
+
