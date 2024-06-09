@@ -1,7 +1,17 @@
-const nameRegex = /^[a-zA-Zа-яА-ЯёЁ\s-]+$/;
-const descriptionRegex = /^[a-zA-Zа-яА-ЯёЁ\s-]+$/;
-const titleRegex = /^[a-zA-Zа-яА-ЯёЁ\s-]+$/;
-const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+
+function isValid(form, input, validationConfig) {
+    if (input.validity.patternMismatch) {
+        input.setCustomValidity(input.dataset.errorMessage);
+    } else {
+        input.setCustomValidity("");
+    }
+
+    if (!input.validity.valid) {
+        showInputError(form, input, input.validationMessage, validationConfig);
+    } else {
+        hideInputError(form, input, validationConfig);
+    }
+}
 
 function showInputError(formElement, inputElement, errorMessage, settings) {
     const errorElement = formElement.querySelector(`#${inputElement.name}-error`);
@@ -18,37 +28,6 @@ function hideInputError(formElement, inputElement, settings) {
         inputElement.classList.remove(settings.inputErrorClass);
         errorElement.textContent = '';
         errorElement.classList.remove(settings.errorClass);
-    }
-}
-
-function checkInputValidity(formElement, inputElement, settings) {
-    let errorMessage = "";
-
-    if (inputElement.validity.valueMissing) {
-        errorMessage = "Поле не должно быть пустым";
-    } else if (inputElement.validity.tooShort || inputElement.validity.tooLong) {
-        errorMessage = inputElement.validationMessage;
-    } else if (inputElement.name === 'name' || inputElement.name === 'place-name') {
-        const regex = inputElement.name === 'name' ? nameRegex : titleRegex;
-        if (!regex.test(inputElement.value)) {
-            errorMessage = inputElement.getAttribute('data-error-message');
-        }
-    } else if (inputElement.name === 'description') {
-        if (!descriptionRegex.test(inputElement.value)) {
-            errorMessage = inputElement.getAttribute('data-error-message');
-        }
-    } else if (inputElement.name === 'link' || inputElement.name === 'avatar-url') {
-        if (!urlRegex.test(inputElement.value)) {
-            errorMessage = inputElement.getAttribute('data-error-message');
-        }
-    }
-
-    if (errorMessage) {
-        inputElement.setCustomValidity(errorMessage);
-        showInputError(formElement, inputElement, errorMessage, settings);
-    } else {
-        inputElement.setCustomValidity('');
-        hideInputError(formElement, inputElement, settings);
     }
 }
 
@@ -73,7 +52,7 @@ function setEventListeners(formElement, settings) {
     inputList.forEach((inputElement) => {
         inputElement.addEventListener('input', () => {
             inputElement.classList.add('input-touched');
-            checkInputValidity(formElement, inputElement, settings);
+            isValid(formElement, inputElement, settings);
             toggleButtonState(inputList, buttonElement, settings);
         });
 
@@ -84,7 +63,7 @@ function setEventListeners(formElement, settings) {
         inputElement.addEventListener('blur', () => {
             if (inputElement.value.length > 0) {
                 inputElement.classList.add('input-touched');
-                checkInputValidity(formElement, inputElement, settings);
+                isValid(formElement, inputElement, settings);
             }
         });
     });
@@ -112,8 +91,19 @@ function clearValidation(formElement, settings) {
 }
 
 function isValidUrl(url) {
-    const urlPattern = /^(ftp|http|https):\/\/[^ "']+$/;
+    const urlPattern = /^(ftp|http|https):\/\/[^ "]+$/;
     return urlPattern.test(url);
 }
 
-export { enableValidation, clearValidation, showInputError, isValidUrl };
+const validationConfig = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'error_active'
+};
+
+enableValidation(validationConfig);
+
+export { toggleButtonState, setEventListeners, enableValidation, clearValidation, showInputError, isValidUrl };

@@ -1,7 +1,7 @@
 import './pages/index.css';
 import { openModal, closeModal, handleOverlayClose } from './components/modal.js';
 import { createCard, deleteCard, likeCard } from './components/card.js';
-import { enableValidation, clearValidation, isValidUrl, showInputError } from './components/validation.js';
+import { enableValidation, clearValidation, isValidUrl, showInputError, toggleButtonState } from './components/validation.js';
 import {
   getUserInfo,
   getInitialCards,
@@ -12,6 +12,7 @@ import {
   unlikeCardOnServer,
   updateAvatar
 } from './components/api.js';
+
 
 let userId;
 
